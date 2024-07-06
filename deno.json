@@ -1,0 +1,7 @@
+{
+  "deploy": {
+    "exclude": [],
+    "include": [],
+    "entrypoint": "main.ts"
+  }
+}
