@@ -1,4 +1,4 @@
-import CBS from './CBS.ts'
+import CBS from '../CBS.ts'
 
 //https://beta-odata4.cbs.nl/CBS/83642NED
 //https://beta-odata4.cbs.nl/CBS/83642NED/RegioSCodes
@@ -11,44 +11,28 @@ import CBS from './CBS.ts'
 //https://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part2-url-conventions/odata-v4.0-errata03-os-part2-url-conventions-complete.html#_Toc453752358
 //https://github.com/statistiekcbs/CBS-Open-Data-v4/blob/master/Python/time_series_graph.py
 
-// inner join?!
-// https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionexpand
-// const kv = await Deno.openKv();
-//
-// const records = kv.list({ prefix: ["municipalities"] });
-// const municipalities = [];
-// for await (const res of records) {
-//   municipalities.push(res.value);
-// }
+const kv = await Deno.openKv()
 
-// if (municipalities.length) {
-//   console.log('result', municipalities);
-//   console.log(performance.now())
-//   Deno.exit()
-// }
-
-const kv = await Deno.openKv();
-
-const provinces = await new CBS('83642NED')
+export const provinces = await new CBS('83642NED')
   .path('RegioSGroups')
   .select('ParentId', 'Id', 'Title')
   .filter(`ParentId eq 'GMPV'`)
   .cache(kv)
   .commit()
 
-const municipalities = await new CBS('83642NED')
+export const municipalities = await new CBS('83642NED')
   .path('RegioSCodes')
   .select('Identifier', 'Title', 'Description', 'DimensionGroupId')
   .cache(kv)
   .commit()
 
-const taxDescriptions = await new CBS('83642NED')
+export const taxDescriptions = await new CBS('83642NED')
   .path('GemeentelijkeHeffingenVanaf2017Codes')
   .select('Identifier', 'Title', 'Description')
   .cache(kv)
   .commit()
 
-const taxRates = await new CBS('83642NED')
+export const taxRates = await new CBS('83642NED')
   .path('Observations')
   .select('Id', 'Measure', 'Value', 'GemeentelijkeHeffingenVanaf2017', 'RegioS', 'Perioden')
   .filter(`
@@ -66,4 +50,3 @@ console.log('municipalities', municipalities)
 
 console.log(provinces)
 console.log('taxes', taxDescriptions)
-// console.log('tax rates', taxRates)
