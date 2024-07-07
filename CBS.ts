@@ -43,8 +43,8 @@ class CBS {
     if (!requestURL)
       throw new Error('Unable to parse URL')
 
+    if (this.#filter) requestURL.searchParams.set('filter', this.#filter)
     if (this.#selection) requestURL.searchParams.set('select', this.#selection)
-    if (this.#filter) requestURL.searchParams.set('filters', this.#filter)
     if (this.#queryLimit) requestURL.searchParams.set('$top', this.#queryLimit.toString(10))
 
     return requestURL;

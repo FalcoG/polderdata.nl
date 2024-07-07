@@ -36,6 +36,13 @@ import CBS from './CBS.ts'
 
 const kv = await Deno.openKv();
 
+const provinces = await new CBS('83642NED')
+  .path('RegioSGroups')
+  .select('ParentId', 'Id', 'Title')
+  .filter(`ParentId eq 'GMPV'`)
+  .cache(kv)
+  .commit()
+
 const municipalities = await new CBS('83642NED')
   .path('RegioSCodes')
   .select('Identifier', 'Title', 'Description', 'DimensionGroupId')
@@ -44,3 +51,5 @@ const municipalities = await new CBS('83642NED')
 
 const resultObject = await municipalities
 console.log('municipalities', resultObject)
+
+console.log(provinces)
