@@ -5,7 +5,7 @@
     "entrypoint": "main.ts"
   },
   "tasks": {
-    "server": "deno run --unstable --allow-net main.ts",
+    "server": "deno run --unstable --allow-net --allow-read main.ts",
     "get-data": "deno run --unstable get-municipalities.ts"
   }
 }
