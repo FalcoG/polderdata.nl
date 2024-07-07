@@ -1,3 +1,5 @@
+import { TResponseOData } from './OData.ts'
+
 class CBS {
   #base = 'https://beta-odata4.cbs.nl/';
   #filter?: string
@@ -6,6 +8,7 @@ class CBS {
   #queryLimit?: number
   #kv?: Deno.Kv
   #persistCache: boolean = false
+  #persistCacheItemKey?: string
 
   constructor(datasetID: string) {
     this.#subPath.push(datasetID)
@@ -57,17 +60,18 @@ class CBS {
       throw new Error(`An error has occured: ${response.status}`);
     }
 
-    return await response.json()
+    return await response.json() as TResponseOData
   }
 
   get kvStorageKey () {
     return ["cbs_odata", this.url.toString()]
   }
 
-  cache (kv: Deno.Kv) {
+  cache (kv: Deno.Kv, cacheItemKey?: string) {
     if (!kv) throw new Error('Deno Kv is required!')
 
     this.#persistCache = true
+    this.#persistCacheItemKey = cacheItemKey
     this.#kv = kv
 
     return this
@@ -79,12 +83,40 @@ class CBS {
 
       if (entry.value !== null) {
         return entry.value;
+      } else {
+        const records = this.#kv.list({ prefix: this.kvStorageKey });
+        const municipalities = [];
+        for await (const res of records) {
+          municipalities.push(res.value);
+        }
+
+        if (municipalities.length > 0) return municipalities;
       }
     }
 
     const object = await this.httpRequest()
 
-    if (this.#persistCache && this.#kv) await this.#kv.set(this.kvStorageKey, object)
+    /**
+     *   resultObject.value.forEach(async (item: {[key: string]: string}) => {
+     *     const key = ["municipalities", item.Identifier]
+     *
+     *     await kv.set(key, item)
+     *   })
+     */
+    if (this.#persistCache && this.#kv) {
+      if (this.#persistCacheItemKey) {
+        for await (const item of object.value) {
+          const localKey = item[this.#persistCacheItemKey]
+
+          if (localKey === null) return console.warn('Local key not found; unable to cache entry')
+
+          const key = [...this.kvStorageKey, localKey]
+          await this.#kv.set(key, item)
+        }
+      } else {
+        await this.#kv.set(this.kvStorageKey, object)
+      }
+    }
 
     return object
   }

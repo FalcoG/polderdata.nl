@@ -11,13 +11,6 @@ import CBS from './CBS.ts'
 //https://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part2-url-conventions/odata-v4.0-errata03-os-part2-url-conventions-complete.html#_Toc453752358
 //https://github.com/statistiekcbs/CBS-Open-Data-v4/blob/master/Python/time_series_graph.py
 
-
-// const result = await new CBS('83642NED')
-//   .path('Observations')
-//   .filter(`Measure eq 'M001178_2'`)
-//   .limit(100)
-//   .commit()
-
 // inner join?!
 // https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionexpand
 // const kv = await Deno.openKv();
@@ -49,7 +42,28 @@ const municipalities = await new CBS('83642NED')
   .cache(kv)
   .commit()
 
-const resultObject = await municipalities
-console.log('municipalities', resultObject)
+const taxDescriptions = await new CBS('83642NED')
+  .path('GemeentelijkeHeffingenVanaf2017Codes')
+  .select('Identifier', 'Title', 'Description')
+  .cache(kv)
+  .commit()
+
+const taxRates = await new CBS('83642NED')
+  .path('Observations')
+  .select('Id', 'Measure', 'Value', 'GemeentelijkeHeffingenVanaf2017', 'RegioS', 'Perioden')
+  .filter(`
+  Measure eq 'M001178_2'
+  and (
+    GemeentelijkeHeffingenVanaf2017 eq 'A047000' or
+    GemeentelijkeHeffingenVanaf2017 eq 'A047006' or
+    GemeentelijkeHeffingenVanaf2017 eq 'A047007'
+  )
+  `)
+  .cache(kv, 'Id')
+  .commit()
+
+console.log('municipalities', municipalities)
 
 console.log(provinces)
+console.log('taxes', taxDescriptions)
+// console.log('tax rates', taxRates)
