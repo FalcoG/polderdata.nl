@@ -4,6 +4,8 @@ class CBS {
   #subPath: Array<string> = ['CBS']
   #selection?: string
   #queryLimit?: number
+  #kv?: Deno.Kv
+  #persistCache: boolean = false
 
   constructor(datasetID: string) {
     this.#subPath.push(datasetID)
@@ -48,8 +50,43 @@ class CBS {
     return requestURL;
   }
 
-  commit() {
-    return fetch(this.url)
+  async httpRequest() {
+    const response = await fetch(this.url)
+
+    if (!response.ok) {
+      throw new Error(`An error has occured: ${response.status}`);
+    }
+
+    return await response.json()
+  }
+
+  get kvStorageKey () {
+    return ["cbs_odata", this.url.toString()]
+  }
+
+  cache (kv: Deno.Kv) {
+    if (!kv) throw new Error('Deno Kv is required!')
+
+    this.#persistCache = true
+    this.#kv = kv
+
+    return this
+  }
+
+  async commit() {
+    if (this.#persistCache && this.#kv) {
+      const entry = await this.#kv.get(this.kvStorageKey);
+
+      if (entry.value !== null) {
+        return entry.value;
+      }
+    }
+
+    const object = await this.httpRequest()
+
+    if (this.#persistCache && this.#kv) await this.#kv.set(this.kvStorageKey, object)
+
+    return object
   }
 }
 

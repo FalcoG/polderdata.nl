@@ -3,5 +3,8 @@
     "exclude": [],
     "include": [],
     "entrypoint": "main.ts"
+  },
+  "tasks": {
+    "get-data": "deno run --unstable get-municipalities.ts"
   }
 }

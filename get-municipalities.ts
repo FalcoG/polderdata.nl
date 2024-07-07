@@ -18,35 +18,29 @@ import CBS from './CBS.ts'
 //   .limit(100)
 //   .commit()
 
+// inner join?!
+// https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionexpand
+// const kv = await Deno.openKv();
+//
+// const records = kv.list({ prefix: ["municipalities"] });
+// const municipalities = [];
+// for await (const res of records) {
+//   municipalities.push(res.value);
+// }
+
+// if (municipalities.length) {
+//   console.log('result', municipalities);
+//   console.log(performance.now())
+//   Deno.exit()
+// }
+
 const kv = await Deno.openKv();
 
-const records = kv.list({ prefix: ["municipalities"] });
-const municipalities = [];
-for await (const res of records) {
-  municipalities.push(res.value);
-}
-
-if (municipalities.length) {
-  console.log('result', municipalities);
-  console.log(performance.now())
-  Deno.exit()
-}
-
-const result = await new CBS('83642NED')
+const municipalities = await new CBS('83642NED')
   .path('RegioSCodes')
   .select('Identifier', 'Title', 'Description', 'DimensionGroupId')
+  .cache(kv)
   .commit()
 
-console.log('result', result)
-
-const resultObject = await result.json()
-
-if (result.ok && resultObject) {
-  resultObject.value.forEach(async (item: {[key: string]: string}) => {
-    const key = ["municipalities", item.Identifier]
-
-    await kv.set(key, item)
-  })
-} else {
-  console.error('Critical failure!')
-}
+const resultObject = await municipalities
+console.log('municipalities', resultObject)
