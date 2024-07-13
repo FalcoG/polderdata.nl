@@ -6,6 +6,7 @@
   },
   "tasks": {
     "server": "deno run --unstable-kv --allow-net --allow-read main.ts",
+    "dev-server": "deno run --unstable-kv --allow-net --allow-read --watch main.ts",
     "get-data": "deno run --unstable-kv get-municipalities.ts"
   }
 }

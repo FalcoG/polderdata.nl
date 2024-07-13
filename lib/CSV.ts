@@ -2,8 +2,8 @@ import { readCSV } from 'jsr:@vslinko/csv'
 
 const options = {
   columnSeparator: '\t',
-  lineSeparator: '\r\n',
-  quote: '$',
+  lineSeparator: '\n',
+  quote: '"',
 }
 
 type TCell = string
