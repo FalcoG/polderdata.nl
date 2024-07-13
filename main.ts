@@ -39,14 +39,14 @@ Deno.serve((req) => {
 
     if (tax) {
       return new Response(JSON.stringify({
-        province_code: tax[0],
-        municipality_code: tax[1],
+        province_code: Number(tax[0]),
+        municipality_code: Number(tax[1]),
         municipality_name: tax[2],
-        property_tax_rate: tax[3],
-        waste_tax_single_household: tax[13],
-        waste_tax_multi_household: tax[15],
-        sewer_tax_single_household: tax[18],
-        sewer_tax_multi_household: tax[20],
+        property_tax_rate: Number(tax[3]),
+        waste_tax_single_household: Number(tax[13]),
+        waste_tax_multi_household: Number(tax[15]),
+        sewer_tax_single_household: Number(tax[18]),
+        sewer_tax_multi_household: Number(tax[20]),
       }), {
         headers: {
           'content-type': 'application/json',
