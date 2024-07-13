@@ -45,8 +45,3 @@ export const taxRates = await new CBS('83642NED')
   `)
   .cache(kv, 'Id')
   .commit()
-
-console.log('municipalities', municipalities)
-
-console.log(provinces)
-console.log('taxes', taxDescriptions)
